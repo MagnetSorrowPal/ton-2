@@ -376,6 +376,10 @@ class ValidateQuery : public td::actor::Actor {
     }
     return true;
   }
+
+  double time_start_ = 0.0;
+  double time_neighbours_ready_ = 0.0;
+  bool logged_ = false;
 };
 
 }  // namespace validator

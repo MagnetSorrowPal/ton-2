@@ -82,6 +82,11 @@ void ValidateQuery::abort_query(td::Status error) {
 bool ValidateQuery::reject_query(std::string error, td::BufferSlice reason) {
   error = error_ctx() + error;
   LOG(ERROR) << "REJECT: aborting validation of block candidate for " << shard_.to_str() << " : " << error;
+  if (!logged_) {
+    logged_ = true;
+    LOG(WARNING) << "TWTWTWT VALIDATOR FAIL " << id_.to_str() << " start=" << time_start_
+                 << " neighbours=" << time_neighbours_ready_ << " end=" << td::Clocks::system() << " | " << error;
+  }
   if (main_promise) {
     errorlog::ErrorLog::log(PSTRING() << "REJECT: aborting validation of block candidate for " << shard_.to_str()
                                       << " : " << error << ": data=" << block_candidate.id.file_hash.to_hex()
@@ -102,6 +107,11 @@ bool ValidateQuery::reject_query(std::string err_msg, td::Status error, td::Buff
 bool ValidateQuery::soft_reject_query(std::string error, td::BufferSlice reason) {
   error = error_ctx() + error;
   LOG(ERROR) << "SOFT REJECT: aborting validation of block candidate for " << shard_.to_str() << " : " << error;
+  if (!logged_) {
+    logged_ = true;
+    LOG(WARNING) << "TWTWTWT VALIDATOR FAIL " << id_.to_str() << " start=" << time_start_
+                 << " neighbours=" << time_neighbours_ready_ << " end=" << td::Clocks::system() << " | " << error;
+  }
   if (main_promise) {
     errorlog::ErrorLog::log(PSTRING() << "SOFT REJECT: aborting validation of block candidate for " << shard_.to_str()
                                       << " : " << error << ": data=" << block_candidate.id.file_hash.to_hex()
@@ -117,6 +127,12 @@ bool ValidateQuery::soft_reject_query(std::string error, td::BufferSlice reason)
 bool ValidateQuery::fatal_error(td::Status error) {
   error.ensure_error();
   LOG(ERROR) << "aborting validation of block candidate for " << shard_.to_str() << " : " << error.to_string();
+  if (!logged_) {
+    logged_ = true;
+    LOG(WARNING) << "TWTWTWT VALIDATOR FAIL " << id_.to_str() << " start=" << time_start_
+                 << " neighbours=" << time_neighbours_ready_ << " end=" << td::Clocks::system() << " | "
+                 << error.to_string();
+  }
   if (main_promise) {
     auto c = error.code();
     if (c <= -667 && c >= -670) {
@@ -149,6 +165,11 @@ void ValidateQuery::finish_query() {
   if (main_promise) {
     main_promise.set_result(now_);
   }
+  if (!logged_) {
+    logged_ = true;
+    LOG(WARNING) << "TWTWTWT VALIDATOR OK " << id_.to_str() << " start=" << time_start_
+                 << " neighbours=" << time_neighbours_ready_ << " end=" << td::Clocks::system();
+  }
   stop();
 }
 
@@ -159,6 +180,7 @@ void ValidateQuery::finish_query() {
  */
 
 void ValidateQuery::start_up() {
+  time_start_ = td::Clocks::system();
   LOG(INFO) << "validate query for " << block_candidate.id.to_str() << " started";
   alarm_timestamp() = timeout;
   rand_seed_.set_zero();
@@ -5506,6 +5528,7 @@ bool ValidateQuery::try_validate() {
         return true;
       }
     }
+    time_neighbours_ready_ = td::Clocks::system();
     LOG(INFO) << "running automated validity checks for block candidate " << id_.to_str();
     if (!block::gen::t_Block.validate_ref(1000000, block_root_)) {
       return reject_query("block "s + id_.to_str() + " failed to pass automated validity checks");

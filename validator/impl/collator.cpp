@@ -76,6 +76,7 @@ Collator::Collator(ShardIdFull shard, bool is_hardfork, UnixTime min_ts, BlockId
 }
 
 void Collator::start_up() {
+  time_start_ = td::Clocks::system();
   LOG(DEBUG) << "Collator for shard " << shard_.to_str() << " started";
   LOG(DEBUG) << "Previous block #1 is " << prev_blocks.at(0).to_str();
   if (prev_blocks.size() > 1) {
@@ -277,6 +278,12 @@ std::string show_shard(const ton::ShardIdFull blk_id) {
 bool Collator::fatal_error(td::Status error) {
   error.ensure_error();
   LOG(ERROR) << "cannot generate block candidate for " << show_shard(shard_) << " : " << error.to_string();
+  if (!logged_) {
+    logged_ = true;
+    LOG(WARNING) << "TWTWTWT COLLATOR FAIL " << new_id.to_str() << " start=" << time_start_
+                 << " neighbours=" << time_neighbours_ready_ << " end=" << td::Clocks::system() << " | "
+                 << error.to_string();
+  }
   if (busy_) {
     main_promise(std::move(error));
     busy_ = false;
@@ -1420,6 +1427,7 @@ bool Collator::try_collate() {
   if (pending) {
     return true;
   }
+  time_neighbours_ready_ = td::Clocks::system();
   CHECK(config_);
   last_proc_int_msg_.first = 0;
   last_proc_int_msg_.second.set_zero();
@@ -3984,6 +3992,11 @@ void Collator::return_block_candidate(td::Result<td::Unit> saved) {
   } else {
     CHECK(block_candidate);
     LOG(INFO) << "sending new BlockCandidate to Promise";
+    if (!logged_) {
+      logged_ = true;
+      LOG(WARNING) << "TWTWTWT COLLATOR OK " << block_candidate->id.to_str() << " start=" << time_start_
+                   << " neighbours=" << time_neighbours_ready_ << " end=" << td::Clocks::system();
+    }
     main_promise(block_candidate->clone());
     busy_ = false;
     stop();

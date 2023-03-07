@@ -192,8 +192,8 @@ void DownloadState::got_block_state_part(td::BufferSlice data, td::uint32 reques
   double elapsed = prev_logged_timer_.elapsed();
   if (elapsed > 10.0) {
     prev_logged_timer_ = td::Timer();
-    LOG(INFO) << "downloading state " << block_id_ << ": total=" << sum_ <<
-        " (" << double(sum_ - prev_logged_sum_) / elapsed << " B/s)";
+    LOG(INFO) << "downloading state " << block_id_ << ": total=" << sum_ << " ("
+              << td::format::as_size((td::uint64)(double(sum_ - prev_logged_sum_) / elapsed)) << "/s)";
     prev_logged_sum_ = sum_;
   }
 

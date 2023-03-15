@@ -114,6 +114,9 @@ if ((ARCHITECTURE MATCHES "arm64") AND (CMAKE_SYSTEM_NAME STREQUAL "Darwin") AND
 endif()
 #END M1 support
 
+message("Add secp256k1")
+add_subdirectory(third-party/secp256k1 EXCLUDE_FROM_ALL)
+
 if (TON_USE_ABSEIL)
   message("Add abseil-cpp")
   set(ABSL_PROPAGATE_CXX_STD TRUE)

@@ -2,7 +2,7 @@ FROM ubuntu:20.04
 
 RUN apt update
 RUN DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get -y install tzdata
-RUN apt install -y build-essential cmake clang openssl libssl-dev zlib1g-dev gperf wget git curl libreadline-dev ccache libmicrohttpd-dev ninja-build libsecp256k1-dev libsodium-dev pkg-config
+RUN apt install -y build-essential cmake clang openssl libssl-dev zlib1g-dev gperf wget git curl libreadline-dev ccache libmicrohttpd-dev ninja-build libsodium-dev pkg-config
 
 WORKDIR /
 
@@ -16,5 +16,5 @@ WORKDIR /ton/build
 ENV CC clang
 ENV CXX clang++
 ENV CCACHE_DISABLE 1
-RUN cmake -GNinja -DCMAKE_BUILD_TYPE=Release -DPORTABLE=1 -DTON_ARCH= -DCMAKE_CXX_FLAGS="-mavx2" ..
+RUN cmake -GNinja -DCMAKE_BUILD_TYPE=Release -DPORTABLE=1 -DTON_ARCH= -DCMAKE_CXX_FLAGS="-mavx2" -DSECP256K1_ENABLE_MODULE_RECOVERY=ON ..
 RUN ninja storage-daemon storage-daemon-cli tonlibjson blockchain-explorer fift func validator-engine validator-engine-console create-state generate-random-id create-hardfork dht-server lite-client

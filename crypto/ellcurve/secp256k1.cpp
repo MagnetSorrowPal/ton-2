@@ -17,7 +17,7 @@
 
 #include "secp256k1.h"
 #include "td/utils/check.h"
-#include <secp256k1_recovery.h>
+#include <third-party/secp256k1/include/secp256k1_recovery.h>
 #include <cstring>
 
 namespace td {

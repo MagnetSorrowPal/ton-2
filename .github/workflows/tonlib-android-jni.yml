@@ -43,7 +43,7 @@ jobs:
         ninja prepare_cross_compiling 
 
         sudo apt remove -y libsodium-dev
-
+        echo =========================================================================
         rm CMakeCache.txt
         ./build-all.sh
         find . -name "*.debug" -type f -delete
